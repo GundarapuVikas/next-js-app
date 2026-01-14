@@ -1,0 +1,76 @@
+# This is an integration.yml file integration workflow to integrate feature to main branch on pull reqeust raise
+# Below code is taken from the bolierplace code we get when we click actions tab on github initially.(Searched nodejs and clciked configure, you will get boiler code)
+# our flow steps follows as this=> 1st build changes, 2nd run tests
+
+# The 'name' property defines the name of the workflow as it will appear in the GitHub Actions UI
+name: Integration
+
+# The 'on' property specifies the events that will trigger this workflow
+# intendation is required for the events
+on:
+    # Trigger the workflow on push events to the 'main' branch
+    push:
+        branches: ["main"]
+    # Trigger the workflow on pull request events targeting the 'main' branch
+    pull_request:
+        branches: ["main"]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4 #tells github to checkout to current branch (default main to feature)
+    # below step is to setup node environment for the workflow
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+    #   run all jobs in nodejs 18, 20, 22 from strategy.
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    # Next thing is to check if the build is successfull
+    # - run: npm i
+    # Below is alternative with name for readability in pipeline
+    - name: "Installing Dependencies"
+      run: npm i
+    # build script, see in package.json
+    # - run: npm run build
+    - name: "Build Command"
+      run: npm run build
+
+  unit-tests:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4 #tells github to checkout to current branch (default main to feature)
+    # below step is to setup node environment for the workflow
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+    #   run all jobs in nodejs 18, 20, 22 from strategy.
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    # Next thing is to check if the build is successfull
+    # - run: npm i
+    # Below is alternative with name for readability in pipeline
+    - name: "Installing Dependencies"
+      run: npm i
+
+    - name: "Running test cases"
+      run: npm run test
+
+
+
+
